@@ -67,11 +67,10 @@ class HdUSDEngine(bpy.types.RenderEngine):
             if self.is_preview:
                 engine_cls = preview_engine.PreviewEngine
 
+            elif depsgraph.scene.hdusd.final.data_source:
+                engine_cls = final_engine.FinalEngineNodetree
             else:
-                if depsgraph.scene.hdusd.final.data_source:
-                    engine_cls = final_engine.FinalEngineNodetree
-                else:
-                    engine_cls = final_engine.FinalEngineScene
+                engine_cls = final_engine.FinalEngineScene
 
             self.engine = engine_cls(self)
             self.engine.sync(depsgraph)

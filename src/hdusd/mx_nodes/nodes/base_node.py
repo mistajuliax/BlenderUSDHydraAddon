@@ -90,11 +90,11 @@ class MxNodeDef(bpy.types.PropertyGroup):
 
     @staticmethod
     def _param_prop_name(name):
-        return 'p_' + name
+        return f'p_{name}'
 
     @staticmethod
     def _input_prop_name(name):
-        return 'in_' + name
+        return f'in_{name}'
 
     def update_prop(self, context):
         nodetree = self.id_data
@@ -136,11 +136,11 @@ class MxNode(bpy.types.ShaderNode):
 
     @staticmethod
     def _folder_prop_name(name):
-        return 'f_' + code_str(name.lower())
+        return f'f_{code_str(name.lower())}'
 
     @staticmethod
     def _nodedef_prop_name(name):
-        return 'nd_' + name
+        return f'nd_{name}'
 
     def init(self, context):
         def init_():
@@ -251,11 +251,9 @@ class MxNode(bpy.types.ShaderNode):
 
     def _compute_node(self, node, out_key, **kwargs):
         doc = kwargs['doc']
-        mx_nodegraph = mx_utils.get_nodegraph_by_node_path(doc, node.name)
-        if mx_nodegraph:
+        if mx_nodegraph := mx_utils.get_nodegraph_by_node_path(doc, node.name):
             node_name = mx_utils.get_node_name_by_node_path(node.name)
-            mx_node = mx_nodegraph.getNode(node_name)
-            if mx_node:
+            if mx_node := mx_nodegraph.getNode(node_name):
                 return mx_node
 
         return node.compute(out_key, **kwargs)
@@ -274,8 +272,7 @@ class MxNode(bpy.types.ShaderNode):
         return self._compute_node(link.from_node, link.from_socket.name, **kwargs)
 
     def get_input_value(self, in_key: [str, int], **kwargs):
-        node = self.get_input_link(in_key, **kwargs)
-        if node:
+        if node := self.get_input_link(in_key, **kwargs):
             return node
 
         return self.get_input_default(in_key)
@@ -311,8 +308,7 @@ class MxNode(bpy.types.ShaderNode):
 
     def ui_folders_update(self, context):
         for i, mx_input in enumerate(self.prop.nodedef().getInputs()):
-            f = mx_input.getAttribute('uifolder')
-            if f:
+            if f := mx_input.getAttribute('uifolder'):
                 self.inputs[i].hide = not getattr(self, self._folder_prop_name(f))
 
         nodetree = self.id_data

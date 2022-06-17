@@ -72,7 +72,7 @@ node_categories = [
 def hide_cycles_and_eevee_poll(method):
     @classmethod
     def func(cls, context):
-        return not context.scene.render.engine == 'HdUSD' and method(context)
+        return context.scene.render.engine != 'HdUSD' and method(context)
     return func
 
 

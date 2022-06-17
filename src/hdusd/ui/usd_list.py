@@ -43,11 +43,10 @@ class HDUSD_OP_usd_list_item_expand(bpy.types.Operator):
             next_index = self.index + 1
             item_indent = item.indent
             removed_items = 0
-            while True:
-                if next_index >= len(items):
-                    break
-                if items[next_index].indent <= item_indent:
-                    break
+            while (
+                next_index < len(items)
+                and not items[next_index].indent <= item_indent
+            ):
                 items.remove(next_index)
                 removed_items += 1
 
@@ -101,7 +100,7 @@ class HDUSD_UL_usd_list_item(bpy.types.UIList):
         if self.layout_type not in {'DEFAULT', 'COMPACT'}:
             return
 
-        for i in range(item.indent):
+        for _ in range(item.indent):
             layout.split(factor=0.1)
 
         items = data.items

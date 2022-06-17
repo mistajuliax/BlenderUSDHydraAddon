@@ -43,18 +43,25 @@ class USDTree(bpy.types.ShaderNodeTree):
         return context.engine in cls.COMPAT_ENGINES
 
     def get_output_node(self, render_type='BOTH'):
-        output_node = next((node for node in self.nodes if isinstance(node, HydraRenderNode) and \
-                            node.render_type == render_type), None)
-
-        if output_node:
+        if output_node := next(
+            (
+                node
+                for node in self.nodes
+                if isinstance(node, HydraRenderNode)
+                and node.render_type == render_type
+            ),
+            None,
+        ):
             return output_node
 
-        # try other output nodes
-        secondary_output_node = next(
-            (node for node in self.nodes if isinstance(node, (PrintFileNode, WriteFileNode))),
-            None)
-
-        return secondary_output_node
+        return next(
+            (
+                node
+                for node in self.nodes
+                if isinstance(node, (PrintFileNode, WriteFileNode))
+            ),
+            None,
+        )
 
     def _reset_nodes(self, nodes, is_hard):
         self._is_resetting = True

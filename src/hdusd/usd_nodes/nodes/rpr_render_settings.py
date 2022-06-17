@@ -38,6 +38,5 @@ class RprRenderSettingsNode(USDNode):
         layout.prop(self, 'adaptive_threshold')
 
     def compute(self, **kwargs):
-        stage = self.get_input_link('Input', **kwargs)
         # TODO: Implement
-        return stage
+        return self.get_input_link('Input', **kwargs)

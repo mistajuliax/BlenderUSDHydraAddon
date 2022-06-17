@@ -45,18 +45,22 @@ class Filter(logging.Filter):
         self.level_show_always = level_show_always
 
     def filter(self, record: logging.LogRecord):
-        if self.level_show_always is not None:
-            if record.levelno >= self.level_show_always:
-                return True
+        if (
+            self.level_show_always is not None
+            and record.levelno >= self.level_show_always
+        ):
+            return True
         return super().filter(record)
 
 
 def is_level_allowed(levelno):
     if not console_filter:
         return True
-    if console_filter.level_show_min is not None:
-        if levelno < console_filter.level_show_min:
-            return False
+    if (
+        console_filter.level_show_min is not None
+        and levelno < console_filter.level_show_min
+    ):
+        return False
     return True
 
 
@@ -66,7 +70,7 @@ def limit_log(name, level_show_always=logging.INFO, level_show_min=logging.DEBUG
         console.removeFilter(console_filter)
         console_filter = None
     if name is not None:
-        console_filter = Filter('usd.'+name, level_show_always, level_show_min)
+        console_filter = Filter(f'usd.{name}', level_show_always, level_show_min)
         console.addFilter(console_filter)
 
 
@@ -150,12 +154,10 @@ def dump_args(func):
     arg_names = func.__code__.co_varnames[:func.__code__.co_argcount]
 
     def echo_func(*args, **kwargs):
-        debug("<{}>: {}{}".format(
-            func.__name__,
-            tuple("{}={}".format(name, arg) for name, arg in zip(arg_names, args)),
-            # args if args else "",
-            " {}".format(kwargs.items()) if kwargs else "",
-        ))
+        debug(
+            f'<{func.__name__}>: {tuple(f"{name}={arg}" for name, arg in zip(arg_names, args))}{f" {kwargs.items()}" if kwargs else ""}'
+        )
+
         return func(*args, **kwargs)
     return echo_func
 

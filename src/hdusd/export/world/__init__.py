@@ -79,8 +79,7 @@ class WorldData:
 
         color = node_data.get('color')
         if color is None:
-            image = node_data.get('image')
-            if image:
+            if image := node_data.get('image'):
                 data.image = cache_image_file(image)
 
         elif isinstance(color, float):
@@ -89,10 +88,8 @@ class WorldData:
         elif isinstance(color, tuple):
             data.color = color[:3]
 
-        else:   # dict
-            image = color.get('image')
-            if image:
-                data.image = cache_image_file(image)
+        elif image := color.get('image'):
+            data.image = cache_image_file(image)
 
         rotation = node_data.get('rotation')
         if isinstance(rotation, tuple):

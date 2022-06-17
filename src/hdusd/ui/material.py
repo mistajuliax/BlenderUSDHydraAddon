@@ -43,10 +43,7 @@ class HDUSD_MATERIAL_PT_context(HdUSD_Panel):
 
         if object:
             is_sortable = len(object.material_slots) > 1
-            rows = 1
-            if is_sortable:
-                rows = 4
-
+            rows = 4 if is_sortable else 1
             row = layout.row()
 
             row.template_list("MATERIAL_UL_matslots", "", object, "material_slots", object,

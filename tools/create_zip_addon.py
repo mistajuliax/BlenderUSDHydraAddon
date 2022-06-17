@@ -71,7 +71,7 @@ def get_version():
     # getting plugin version
     text = (repo_dir / "src/hdusd/__init__.py").read_text()
     m = re.search(r'"version": \((\d+), (\d+), (\d+)\)', text)
-    plugin_ver = m.group(1), m.group(2), m.group(3)
+    plugin_ver = m[1], m[2], m[3]
 
     return (*plugin_ver, build_ver)
 

@@ -105,11 +105,7 @@ def sync(obj_prim, obj: bpy.types.Object, **kwargs):
             usd_light.CreateWidthAttr(light.size)
             usd_light.CreateHeightAttr(light.size_y)
 
-        elif shape_type == 'DISK':
-            usd_light = UsdLux.DiskLight.Define(stage, light_path)
-            usd_light.CreateRadiusAttr(light.size)
-
-        else:  # shape_type == 'ELLIPSE':
+        else:
             usd_light = UsdLux.DiskLight.Define(stage, light_path)
             usd_light.CreateRadiusAttr(light.size)
 

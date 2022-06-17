@@ -101,24 +101,17 @@ def sync(objects_prim, obj_data: ObjectData, **kwargs):
     xform.MakeMatrixXform().Set(Gf.Matrix4d(obj_data.transform))
 
     obj = obj_data.object
-    if obj.type == 'MESH':
-        if obj.mode == 'OBJECT':
-            # if in edit mode use to_mesh
-            mesh.sync(obj_prim, obj, **kwargs)
-        else:
-            to_mesh.sync(obj_prim, obj, **kwargs)
+    if obj.type == 'MESH' and obj.mode == 'OBJECT':
+        # if in edit mode use to_mesh
+        mesh.sync(obj_prim, obj, **kwargs)
+    elif obj.type == 'MESH' or obj.type not in ['LIGHT', 'CAMERA', 'EMPTY']:
+        to_mesh.sync(obj_prim, obj, **kwargs)
 
     elif obj.type == 'LIGHT':
         light.sync(obj_prim, obj, **kwargs)
 
     elif obj.type == 'CAMERA':
         camera.sync(obj_prim, obj, **kwargs)
-
-    elif obj.type == 'EMPTY':
-        pass
-
-    else:
-        to_mesh.sync(obj_prim, obj, **kwargs)
 
 
 def sync_update(root_prim, obj_data: ObjectData, is_updated_geometry, is_updated_transform,
@@ -139,20 +132,13 @@ def sync_update(root_prim, obj_data: ObjectData, is_updated_geometry, is_updated
 
     if is_updated_geometry:
         obj = obj_data.object
-        if obj.type == 'MESH':
-            if obj.mode == 'OBJECT':
-                mesh.sync_update(obj_prim, obj, **kwargs)
-            else:
-                to_mesh.sync_update(obj_prim, obj, **kwargs)
+        if obj.type == 'MESH' and obj.mode == 'OBJECT':
+            mesh.sync_update(obj_prim, obj, **kwargs)
+        elif obj.type == 'MESH' or obj.type not in ['LIGHT', 'CAMERA', 'EMPTY']:
+            to_mesh.sync_update(obj_prim, obj, **kwargs)
 
         elif obj.type == 'LIGHT':
             light.sync_update(obj_prim, obj, **kwargs)
 
         elif obj.type == 'CAMERA':
             camera.sync_update(obj_prim, obj, **kwargs)
-
-        elif obj.type == 'EMPTY':
-            pass
-
-        else:
-            to_mesh.sync_update(obj_prim, obj, **kwargs)

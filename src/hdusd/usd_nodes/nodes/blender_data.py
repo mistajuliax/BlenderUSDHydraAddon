@@ -271,10 +271,13 @@ class BlenderDataNode(USDNode):
             if isinstance(update.id, bpy.types.Collection):
                 coll = update.id
 
-                current_keys = set(prim.GetName() for prim in root_prim.GetAllChildren())
+                current_keys = {prim.GetName() for prim in root_prim.GetAllChildren()}
                 required_keys = set()
-                depsgraph_keys = set(obj_data.sdf_name for obj_data in
-                                     ObjectData.depsgraph_objects(depsgraph))
+                depsgraph_keys = {
+                    obj_data.sdf_name
+                    for obj_data in ObjectData.depsgraph_objects(depsgraph)
+                }
+
 
                 if self.data == 'SCENE':
                     required_keys = depsgraph_keys
@@ -286,7 +289,7 @@ class BlenderDataNode(USDNode):
                     if coll.name != self.collection.name:
                         continue
 
-                    required_keys = set(object.sdf_name(obj) for obj in coll.objects)
+                    required_keys = {object.sdf_name(obj) for obj in coll.objects}
                     required_keys.intersection_update(depsgraph_keys)
 
                 elif self.data == 'OBJECT':

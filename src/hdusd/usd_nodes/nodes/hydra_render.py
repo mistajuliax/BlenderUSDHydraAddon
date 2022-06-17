@@ -35,8 +35,7 @@ class HydraRenderNode(USDNode):
     )
 
     def compute(self, **kwargs):
-        stage = self.get_input_link('Input', **kwargs)
-        return stage
+        return self.get_input_link('Input', **kwargs)
 
     def node_computed(self):
         # notify USD nodetree that Output node was computed

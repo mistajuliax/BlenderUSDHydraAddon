@@ -56,23 +56,30 @@ def unregister():
 
 def get_node_def_cls(node_name, nd_type):
     nd_name = f"ND_{node_name}_{nd_type}"
-    node_def_cls = next((cls for cls in mx_nodedef_classes if cls.__name__.endswith(nd_name)), None)
-    if node_def_cls:
+    if node_def_cls := next(
+        (cls for cls in mx_nodedef_classes if cls.__name__.endswith(nd_name)),
+        None,
+    ):
         return node_def_cls
 
-    node_def_cls = next((cls for cls in mx_nodedef_classes if cls._node_name == node_name), None)
-
-    if node_def_cls:
+    if node_def_cls := next(
+        (cls for cls in mx_nodedef_classes if cls._node_name == node_name),
+        None,
+    ):
         return node_def_cls
 
     raise KeyError("Unable to find MaterialX nodedef class", node_name, nd_type)
 
 
 def get_mx_node_cls(node_name, nd_type):
-    node_cls = next((cls for cls in mx_node_classes if cls.__name__.endswith(node_name) and
-                nd_type in cls._data_types),
-                None)
-    if node_cls:
+    if node_cls := next(
+        (
+            cls
+            for cls in mx_node_classes
+            if cls.__name__.endswith(node_name) and nd_type in cls._data_types
+        ),
+        None,
+    ):
         return node_cls
 
     raise KeyError("Unable to find MaterialX node class", node_name, nd_type)

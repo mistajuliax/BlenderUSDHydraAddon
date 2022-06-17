@@ -173,10 +173,14 @@ class RenderSettingsPanel(HdUSD_Panel):
         col.alignment = 'RIGHT'
         col.label(text="Data Source")
         col = split.column()
-        col.menu(HDUSD_MT_data_source_final.bl_idname if self.engine_type == 'FINAL' else
-                 HDUSD_MT_data_source_viewport.bl_idname,
-                 text=settings.data_source if settings.data_source else scene.name,
-                 icon='NODETREE' if settings.data_source else 'SCENE_DATA')
+        col.menu(
+            HDUSD_MT_data_source_final.bl_idname
+            if self.engine_type == 'FINAL'
+            else HDUSD_MT_data_source_viewport.bl_idname,
+            text=settings.data_source or scene.name,
+            icon='NODETREE' if settings.data_source else 'SCENE_DATA',
+        )
+
 
         if self.engine_type == 'FINAL' and settings.data_source:
             split = layout.row(align=True).split(factor=0.4)
@@ -185,8 +189,10 @@ class RenderSettingsPanel(HdUSD_Panel):
             col.label(text="Camera")
             col = split.column()
             col.enabled = settings.nodetree_camera != ''
-            col.menu(HDUSD_MT_nodetree_camera_final.bl_idname,
-                     text=settings.nodetree_camera if settings.nodetree_camera else '')
+            col.menu(
+                HDUSD_MT_nodetree_camera_final.bl_idname,
+                text=settings.nodetree_camera or '',
+            )
 
 
 class HDUSD_RENDER_PT_render_settings_final(RenderSettingsPanel):

@@ -52,9 +52,12 @@ in USD repository.
         usd_imaging_cmake = usd_dir / "pxr/usdImaging/CMakeLists.txt"
         print("Modifying:", usd_imaging_cmake)
         cmake_txt = usd_imaging_cmake.read_text()
-        usd_imaging_cmake.write_text(cmake_txt + f"""
+        usd_imaging_cmake.write_text(
+            f"""{cmake_txt}
 add_subdirectory("{usd_imaging_lite_path.absolute().as_posix()}" usdImagingLite)
-        """)
+        """
+        )
+
 
         bin_usd_dir = bin_dir / "USD"
         call_args = (sys.executable, str(usd_dir / "build_scripts/build_usd.py"),

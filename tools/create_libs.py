@@ -27,10 +27,12 @@ def iterate_files(path, glob, *, ignore_parts=(), ignore_suffix=()):
     assert path.is_dir(), f"Directory {path} not exists"
 
     for f in path.glob(glob):
-        if f.is_dir() or f.suffix in ignore_suffix or any(p in f.parts for p in ignore_parts):
-            continue
-
-        yield f
+        if (
+            not f.is_dir()
+            and f.suffix not in ignore_suffix
+            and all(p not in f.parts for p in ignore_parts)
+        ):
+            yield f
 
 
 def iterate_copied_files(usd_dir, hdrpr_dir, mx_dir):

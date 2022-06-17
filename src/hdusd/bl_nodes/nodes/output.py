@@ -34,8 +34,10 @@ class ShaderNodeOutputMaterial(NodeParser):
                 'edf': surface,
             })
 
-        result = self.create_node('surfacematerial', 'material', {
-            'surfaceshader': surface,
-        })
-
-        return result
+        return self.create_node(
+            'surfacematerial',
+            'material',
+            {
+                'surfaceshader': surface,
+            },
+        )

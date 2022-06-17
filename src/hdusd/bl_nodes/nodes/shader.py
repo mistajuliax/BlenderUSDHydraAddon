@@ -325,13 +325,15 @@ class ShaderNodeBsdfDiffuse(NodeParser):
         roughness = self.get_input_value('Roughness')
         normal = self.get_input_link('Normal')
 
-        result = self.create_node('diffuse_brdf', 'BSDF', {
-            'color': color,
-            'roughness': roughness,
-            'normal': normal,
-        })
-
-        return result
+        return self.create_node(
+            'diffuse_brdf',
+            'BSDF',
+            {
+                'color': color,
+                'roughness': roughness,
+                'normal': normal,
+            },
+        )
 
 
 class ShaderNodeBsdfGlass(NodeParser):
@@ -341,22 +343,23 @@ class ShaderNodeBsdfGlass(NodeParser):
         ior = self.get_input_value('IOR')
         normal = self.get_input_link('Normal')
 
-        # CREATING STANDARD SURFACE
-        result = self.create_node('standard_surface', 'surfaceshader', {
-            'base': 0.0,
-            'normal': normal,
-            'specular': 1.0,
-            'specular_color': color,
-            'specular_roughness': roughness,
-            'specular_IOR': ior,
-            'specular_anisotropy': 0.0,
-            'specular_rotation': 0.0,
-            'transmission': 1.0,
-            'transmission_color': color,
-            'transmission_extra_roughness': roughness,
-        })
-
-        return result
+        return self.create_node(
+            'standard_surface',
+            'surfaceshader',
+            {
+                'base': 0.0,
+                'normal': normal,
+                'specular': 1.0,
+                'specular_color': color,
+                'specular_roughness': roughness,
+                'specular_IOR': ior,
+                'specular_anisotropy': 0.0,
+                'specular_rotation': 0.0,
+                'transmission': 1.0,
+                'transmission_color': color,
+                'transmission_extra_roughness': roughness,
+            },
+        )
 
 
 class ShaderNodeEmission(NodeParser):
@@ -364,11 +367,13 @@ class ShaderNodeEmission(NodeParser):
         color = self.get_input_value('Color')
         strength = self.get_input_value('Strength')
 
-        result = self.create_node('uniform_edf', 'EDF', {
-            'color': color * strength,
-        })
-
-        return result
+        return self.create_node(
+            'uniform_edf',
+            'EDF',
+            {
+                'color': color * strength,
+            },
+        )
 
 
 class ShaderNodeMixShader(NodeParser):
@@ -377,21 +382,14 @@ class ShaderNodeMixShader(NodeParser):
         shader1 = self.get_input_link(1)
         shader2 = self.get_input_link(2)
 
-        if shader1 is None and shader2 is None:
-            return None
-
         if shader1 is None:
-            return shader2
-
+            return None if shader2 is None else shader2
         if shader2 is None:
             return shader1
 
-        result = self.create_node('mix', 'BSDF', {
-            'fg': shader1,
-            'bg': shader2,
-            'mix': factor
-        })
-        return result
+        return self.create_node(
+            'mix', 'BSDF', {'fg': shader1, 'bg': shader2, 'mix': factor}
+        )
 
 
 class ShaderNodeAddShader(NodeParser):
@@ -399,17 +397,9 @@ class ShaderNodeAddShader(NodeParser):
         shader1 = self.get_input_link(0)
         shader2 = self.get_input_link(1)
 
-        if shader1 is None and shader2 is None:
-            return None
-
         if shader1 is None:
-            return shader2
-
+            return None if shader2 is None else shader2
         if shader2 is None:
             return shader1
 
-        result = self.create_node('add', 'BSDF', {
-            'in1': shader1,
-            'in2': shader2
-        })
-        return result
+        return self.create_node('add', 'BSDF', {'in1': shader1, 'in2': shader2})

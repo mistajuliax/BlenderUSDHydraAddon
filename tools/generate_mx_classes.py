@@ -61,10 +61,12 @@ def parse_value_str(val_str, mx_type, *, first_only=False, is_enum=False):
 
 def generate_property_code(mx_param, nodegroup):
     mx_type = mx_param.getType()
-    prop_attrs = {}
+    prop_attrs = {
+        'name': mx_param.getAttribute('uiname')
+        if mx_param.hasAttribute('uiname')
+        else title_str(mx_param.getName())
+    }
 
-    prop_attrs['name'] = mx_param.getAttribute('uiname') if mx_param.hasAttribute('uiname') \
-                         else title_str(mx_param.getName())
 
     prop_attrs['description'] = mx_param.getAttribute('doc')
 
@@ -141,10 +143,11 @@ def generate_property_code(mx_param, nodegroup):
     for mx_attr, prop_attr in (('uimin', 'min'), ('uimax', 'max'),
                                ('uisoftmin', 'soft_min'), ('uisoftmax', 'soft_max'),
                                ('value', 'default')):
-        if mx_param.hasAttribute(mx_attr):
-            if prop_attr == 'default' and nodegroup in ("texture2d", "texture3d") and mx_type == 'filename':
-                continue
-
+        if mx_param.hasAttribute(mx_attr) and (
+            prop_attr != 'default'
+            or nodegroup not in ("texture2d", "texture3d")
+            or mx_type != 'filename'
+        ):
             prop_attrs[prop_attr] = parse_value_str(
                 mx_param.getAttribute(mx_attr), mx_type, first_only=mx_attr != 'value')
 
@@ -175,23 +178,23 @@ def nodedef_data_type(nodedef):
 
 
 def param_prop_name(name):
-    return 'p_' + name
+    return f'p_{name}'
 
 
 def input_prop_name(name):
-    return 'in_' + name
+    return f'in_{name}'
 
 
 def output_prop_name(name):
-    return 'out_' + name
+    return f'out_{name}'
 
 
 def folder_prop_name(name):
-    return 'f_' + code_str(name.lower())
+    return f'f_{code_str(name.lower())}'
 
 
 def nodedef_prop_name(name):
-    return 'nd_' + name
+    return f'nd_{name}'
 
 
 def get_mx_nodedef_class_name(nodedef, prefix):
@@ -203,13 +206,13 @@ def get_mx_node_class_name(nodedef, prefix):
 
 
 def generate_mx_nodedef_class_code(nodedef: mx.NodeDef, prefix: str):
-    code_strings = []
-    code_strings.append(
-f"""
+    code_strings = [
+        f"""
 class {get_mx_nodedef_class_name(nodedef, prefix)}(MxNodeDef):
     _file_path = FILE_PATH
     _nodedef_name = '{nodedef.getName()}'
-    _node_name = '{nodedef.getNodeString()}'""")
+    _node_name = '{nodedef.getNodeString()}'"""
+    ]
 
     nodegroup = nodedef.getAttribute('nodegroup')
 
@@ -244,9 +247,8 @@ def generate_mx_node_class_code(nodedefs, prefix, category):
         category = get_attr(nodedef, 'nodegroup', prefix)
 
     class_name = get_mx_node_class_name(nodedef, prefix)
-    code_strings = []
-    code_strings.append(
-f"""
+    code_strings = [
+        f"""
 class {class_name}(MxNode):
     bl_label = '{get_attr(nodedef, 'uiname', title_str(nodedef.getNodeString()))}'
     bl_idname = 'hdusd.{class_name}'
@@ -255,7 +257,8 @@ class {class_name}(MxNode):
     category = '{category}'
     
     _data_types = {tuple(nodedef_data_type(nd) for nd in nodedefs)}
-""")
+"""
+    ]
 
     ui_folders = []
     for mx_param in [*nodedef.getParameters(), *nodedef.getInputs()]:
@@ -302,9 +305,8 @@ class {class_name}(MxNode):
 def generate_classes_code(file_path, prefix, category):
     IGNORE_NODEDEF_DATA_TYPE = ('matrix33', 'matrix44', 'matrix33FA', 'matrix44FA')
 
-    code_strings = []
-    code_strings.append(
-f"""#**********************************************************************
+    code_strings = [
+        f"""#**********************************************************************
 # Copyright 2020 Advanced Micro Devices, Inc
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -332,7 +334,8 @@ from .base_node import MxNodeDef, MxNode
 
 
 FILE_PATH = r"{file_path.relative_to(libs_dir)}"
-""")
+"""
+    ]
 
     doc = mx.createDocument()
     mx.readFromXmlFile(doc, str(file_path))
@@ -386,14 +389,20 @@ def main():
         ('PBR', "PBR", mx_libs_dir / "pbrlib/pbrlib_defs.mtlx"),
     ]
 
-    for f in (hdrpr_mat_dir / "Shaders").glob("rpr_*.mtlx"):
-        files.append(('RPR', "RPR Shaders", f))
+    files.extend(
+        ('RPR', "RPR Shaders", f)
+        for f in (hdrpr_mat_dir / "Shaders").glob("rpr_*.mtlx")
+    )
 
-    for f in (hdrpr_mat_dir / "Utilities").glob("rpr_*.mtlx"):
-        files.append(('RPR', "RPR Utilities", f))
+    files.extend(
+        ('RPR', "RPR Utilities", f)
+        for f in (hdrpr_mat_dir / "Utilities").glob("rpr_*.mtlx")
+    )
 
-    for f in (hdrpr_mat_dir / "Patterns").glob("rpr_*.mtlx"):
-        files.append(('RPR', "RPR Patterns", f))
+    files.extend(
+        ('RPR', "RPR Patterns", f)
+        for f in (hdrpr_mat_dir / "Patterns").glob("rpr_*.mtlx")
+    )
 
     for prefix, category, file_path in files:
 

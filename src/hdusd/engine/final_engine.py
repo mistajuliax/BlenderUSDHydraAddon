@@ -118,10 +118,7 @@ class FinalEngine(Engine):
         renderer.Render(self.stage.GetPseudoRoot(), params)
 
         time_begin = time.perf_counter()
-        while True:
-            if self.render_engine.test_break():
-                break
-
+        while not self.render_engine.test_break():
             percent_done = renderer.GetRenderStats()['percentDone']
             self.notify_status(percent_done / 100, f"Render Time: {time_str(time.perf_counter() - time_begin)} | Done: {round(percent_done)}%")
 
@@ -142,7 +139,7 @@ class FinalEngine(Engine):
             usd_camera = UsdAppUtils.GetCameraAtPath(self.stage, scene.hdusd.final.nodetree_camera)
         else:
             usd_camera = UsdAppUtils.GetCameraAtPath(self.stage, Tf.MakeValidIdentifier(scene.camera.data.name))
-       
+
         gf_camera = usd_camera.GetCamera()
         renderer.SetCameraState(gf_camera.frustum.ComputeViewMatrix(),
                                 gf_camera.frustum.ComputeProjectionMatrix())
@@ -173,10 +170,18 @@ class FinalEngine(Engine):
         # Preparations for syncing
         time_begin = time.perf_counter()
 
-        border = ((0, 0), (1, 1)) if not scene.render.use_border else \
-            ((scene.render.border_min_x, scene.render.border_min_y),
-             (scene.render.border_max_x - scene.render.border_min_x,
-              scene.render.border_max_y - scene.render.border_min_y))
+        border = (
+            (
+                (scene.render.border_min_x, scene.render.border_min_y),
+                (
+                    scene.render.border_max_x - scene.render.border_min_x,
+                    scene.render.border_max_y - scene.render.border_min_y,
+                ),
+            )
+            if scene.render.use_border
+            else ((0, 0), (1, 1))
+        )
+
 
         screen_width = int(scene.render.resolution_x * scene.render.resolution_percentage / 100)
         screen_height = int(scene.render.resolution_y * scene.render.resolution_percentage / 100)

@@ -45,16 +45,15 @@ def update(context):
         context.scene.collection.children.link(collection)
         log("Collection created", collection)
 
-    objects = {}
-    for obj in collection.objects:
-        if obj.hdusd.is_usd:
-            objects[obj.hdusd.sdf_path] = obj
+    objects = {
+        obj.hdusd.sdf_path: obj
+        for obj in collection.objects
+        if obj.hdusd.is_usd
+    }
+
     obj_paths = set(objects.keys())
 
-    prim_paths = set()
-    for prim in stage.TraverseAll():
-        prim_paths.add(str(prim.GetPath()))
-
+    prim_paths = {str(prim.GetPath()) for prim in stage.TraverseAll()}
     paths_to_remove = obj_paths - prim_paths
     paths_to_add = prim_paths - obj_paths
 

@@ -37,7 +37,7 @@ def set_param_value(mx_param, val, nd_type):
             val_ng_path = val_nodegraph.getNamePath()
             param_ng_path = param_nodegraph.getNamePath()
             ind = val_ng_path.rfind('/')
-            ind = ind if ind >= 0 else 0
+            ind = max(ind, 0)
             if param_ng_path != val_ng_path[:ind]:
                 raise ValueError(f"Inconsistent nodegraphs. Cannot connect input "
                                  f"{mx_param.getNamePath()} to {val.getNamePath()}")
@@ -56,12 +56,10 @@ def set_param_value(mx_param, val, nd_type):
         else:
             mx_param.setValueString(str(val))
 
+    elif mx_type := getattr(mx, title_str(nd_type), None):
+        mx_param.setValue(mx_type(val))
     else:
-        mx_type = getattr(mx, title_str(nd_type), None)
-        if mx_type:
-            mx_param.setValue(mx_type(val))
-        else:
-            mx_param.setValue(val)
+        mx_param.setValue(val)
 
 
 def is_value_equal(mx_val, val, nd_type):
@@ -85,11 +83,7 @@ def get_attr(mx_param, name, else_val=None):
 def parse_value(node, mx_val, mx_type, file_prefix=None):
     if mx_type in ('string', 'float', 'integer', 'boolean', 'filename', 'angle'):
         if node.category in ('texture2d', 'texture3d') and mx_type == 'filename':
-            if Path(mx_val).exists():
-                return bpy.data.images.load(mx_val)
-
-            return None
-
+            return bpy.data.images.load(mx_val) if Path(mx_val).exists() else None
         if file_prefix and mx_type == 'filename':
             mx_val = str((file_prefix / mx_val).resolve())
 
@@ -129,9 +123,8 @@ def get_nodedef_inputs(nodedef, uniform=None):
         elif input.getAttribute('uniform') == 'true':
             if uniform:
                 yield input
-        else:
-            if not uniform:
-                yield input
+        elif not uniform:
+            yield input
 
 
 def get_file_prefix(mx_node, file_path):

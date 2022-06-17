@@ -33,9 +33,6 @@ class PrimPropertyItem(PropertyGroup):
             # property is not initialized yet
             return
 
-        # TODO: implementation
-        pass
-
     name: StringProperty(name="Name", default="")
     type: EnumProperty(
         items=(('STR', "String", "String value"),
@@ -91,8 +88,7 @@ class UsdList(PropertyGroup):
         self.items.clear()
         self.item_index = -1
 
-        stage = self.cached_stage()
-        if stage:
+        if stage := self.cached_stage():
             for prim in stage.GetPseudoRoot().GetChildren():
                 item = self.items.add()
                 item.sdf_path = str(prim.GetPath())

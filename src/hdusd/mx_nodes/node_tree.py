@@ -110,15 +110,13 @@ class MxNodeTree(bpy.types.ShaderNodeTree):
                             mx_utils.parse_value(node, val, mx_input.getType(), file_prefix))
                         continue
 
-                    node_name = mx_input.getNodeName()
-                    if node_name:
+                    if node_name := mx_input.getNodeName():
                         new_mx_node = mx_nodegraph.getNode(node_name)
                         new_node = import_node(new_mx_node, layer + 1)
                         self.links.new(new_node.outputs[0], node.inputs[input_name])
                         continue
 
-                    new_nodegraph_name = mx_input.getAttribute('nodegraph')
-                    if new_nodegraph_name:
+                    if new_nodegraph_name := mx_input.getAttribute('nodegraph'):
                         output_name = mx_input.getAttribute('output')
                         new_mx_nodegraph = mx_nodegraph.getNodeGraph(new_nodegraph_name)
                         mx_output = new_mx_nodegraph.getOutput(output_name)

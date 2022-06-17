@@ -53,7 +53,7 @@ class CameraData:
         data.clip_plane = (camera.clip_start, camera.clip_end)
         data.transform = tuple(transform)
         data.mode = camera.type
-        
+
         if camera.dof.use_dof:
             # calculating focus_distance
             if not camera.dof.focus_object:
@@ -81,7 +81,11 @@ class CameraData:
 
         data.lens_shift = tuple(data.lens_shift[i] / size[i] + (pos[i] + size[i] * 0.5 - 0.5) / size[i] for i in (0, 1))
 
-        if camera.type == 'PERSP':
+        if (
+            camera.type == 'PERSP'
+            or camera.type != 'ORTHO'
+            and camera.type == 'PANO'
+        ):
             data.focal_length = camera.lens
             if camera.sensor_fit == 'VERTICAL':
                 data.sensor_size = (camera.sensor_height * ratio, camera.sensor_height)
@@ -105,19 +109,6 @@ class CameraData:
 
             data.ortho_size = tuple(data.ortho_size[i] * size[i] for i in (0, 1))
             data.clip_plane = (camera.clip_start, min(camera.clip_end, MAX_ORTHO_DEPTH + camera.clip_start))
-
-        elif camera.type == 'PANO':
-            # TODO: Recheck parameters for PANO camera
-            data.focal_length = camera.lens
-            if camera.sensor_fit == 'VERTICAL':
-                data.sensor_size = (camera.sensor_height * ratio, camera.sensor_height)
-            elif camera.sensor_fit == 'HORIZONTAL':
-                data.sensor_size = (camera.sensor_width, camera.sensor_width / ratio)
-            else:
-                data.sensor_size = (camera.sensor_width, camera.sensor_width / ratio) if ratio > 1.0 else \
-                                   (camera.sensor_width * ratio, camera.sensor_width)
-
-            data.sensor_size = tuple(data.sensor_size[i] * size[i] for i in (0, 1))
 
         else:
             raise ValueError("Incorrect camera.type value",camera, camera.type)
@@ -212,21 +203,6 @@ class CameraData:
 
             usd_camera.CreateHorizontalApertureOffsetAttr(lens_shift[0] * self.ortho_size[0] * tile_size[0] * 10)
             usd_camera.CreateVerticalApertureOffsetAttr(lens_shift[1] * self.ortho_size[1] * tile_size[1] * 10)
-
-        elif self.mode == 'PANO':
-            # TODO: Make panoramic camera
-            pass
-            # usd_camera.set_sensor_size(*self.sensor_size)
-            # usd_camera.set_focal_length(self.focal_length)
-
-        # TODO apply Depth Of Field settings to camera
-        if self.dof_data:
-            pass
-            # usd_camera.set_focus_distance(self.dof_data[0])
-            # usd_camera.set_f_stop(self.dof_data[1])
-            # usd_camera.set_aperture_blades(self.dof_data[2])
-        else:
-            pass
             # usd_camera.set_f_stop(None)
 
         # usd_camera.set_transform(np.array(self.transform, dtype=np.float32))
@@ -266,22 +242,6 @@ class CameraData:
 
             gf_camera.horizontalApertureOffset = lens_shift[0] * self.ortho_size[0] * tile_size[0] * 10
             gf_camera.verticalApertureOffset = lens_shift[1] * self.ortho_size[1] * tile_size[1] * 10
-
-        elif self.mode == 'PANO':
-            # TODO: store panoramic camera settings
-            pass
-            # usd_camera.set_sensor_size(*self.sensor_size)
-            # usd_camera.set_focal_length(self.focal_length)
-
-        if self.dof_data:
-            # TODO: store Depth Of Field camera settings
-            pass
-            # usd_camera.set_focus_distance(self.dof_data[0])
-            # usd_camera.set_f_stop(self.dof_data[1])
-            # usd_camera.set_aperture_blades(self.dof_data[2])
-        else:
-            pass
-            # usd_camera.set_f_stop(None)
 
         gf_camera.transform = Gf.Matrix4d(np.transpose(self.transform))
 

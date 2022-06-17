@@ -26,10 +26,7 @@ class NodeItem:
         self.data = data
 
     def node_item(self, value):
-        if isinstance(value, NodeItem):
-            return value
-
-        return NodeItem(value)
+        return value if isinstance(value, NodeItem) else NodeItem(value)
 
     # MATH OPERATIONS
     def _arithmetic_helper(self, other, func):
@@ -76,7 +73,9 @@ class NodeItem:
         return self._arithmetic_helper(other, lambda a, b: a * b)
 
     def __truediv__(self, other):
-        return self._arithmetic_helper(other, lambda a, b: a / b if not math.isclose(b, 0.0) else 0.0)
+        return self._arithmetic_helper(
+            other, lambda a, b: 0.0 if math.isclose(b, 0.0) else a / b
+        )
 
     def __mod__(self, other):
         return self._arithmetic_helper(other, lambda a, b: a % b)
@@ -123,18 +122,18 @@ class NodeItem:
         return dot
 
     def if_else(self, cond: str, other, if_value, else_value):
-        if cond == '>':
-            res = self._arithmetic_helper(other, lambda a, b: float(a > b))
-        elif cond == '>=':
-            res = self._arithmetic_helper(other, lambda a, b: float(a >= b))
-        elif cond == '==':
-            res = self._arithmetic_helper(other, lambda a, b: float(a == b))
+        if cond == '!=':
+            return self.if_else('==', other, else_value, if_value)
         elif cond == '<':
             return self.node_item(other).if_else('>', self, else_value, if_value)
         elif cond == '<=':
             return self.node_item(other).if_else('>=', self, else_value, if_value)
-        elif cond == '!=':
-            return self.if_else('==', other, else_value, if_value)
+        elif cond == '==':
+            res = self._arithmetic_helper(other, lambda a, b: float(a == b))
+        elif cond == '>':
+            res = self._arithmetic_helper(other, lambda a, b: float(a > b))
+        elif cond == '>=':
+            res = self._arithmetic_helper(other, lambda a, b: float(a >= b))
         else:
             raise ValueError("Incorrect condition:", cond)
 
@@ -217,7 +216,7 @@ class NodeParser:
         if isinstance(val, (int, float)):
             return float(val)
 
-        if len(val) in (3, 4):
+        if len(val) in {3, 4}:
             return tuple(val)
 
         if isinstance(val, str):
@@ -226,10 +225,7 @@ class NodeParser:
         raise TypeError("Unknown value type to pass to rpr", val)
 
     def node_item(self, value):
-        if isinstance(value, NodeItem):
-            return value
-
-        return NodeItem(value)
+        return value if isinstance(value, NodeItem) else NodeItem(value)
 
     # HELPER FUNCTIONS
     # Child classes should use them to do their export

@@ -55,7 +55,7 @@ class PreviewEngine(Engine):
         object.sync(stage.GetPseudoRoot(), object.ObjectData.from_object(depsgraph.scene.camera),
                     scene=depsgraph.scene)
 
-        log(f"Sync finished")
+        log("Sync finished")
 
     def render(self, depsgraph):
         scene = depsgraph.scene

@@ -71,9 +71,12 @@ def get_panels():
     }
 
     for panel in bpy.types.Panel.__subclasses__():
-        if hasattr(panel, 'COMPAT_ENGINES') and 'BLENDER_RENDER' in panel.COMPAT_ENGINES:
-            if panel.__name__ not in exclude_panels:
-                yield panel
+        if (
+            hasattr(panel, 'COMPAT_ENGINES')
+            and 'BLENDER_RENDER' in panel.COMPAT_ENGINES
+            and panel.__name__ not in exclude_panels
+        ):
+            yield panel
 
 
 def register():

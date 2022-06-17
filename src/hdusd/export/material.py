@@ -25,7 +25,7 @@ log = logging.Log(tag='export.material')
 def sdf_name(mat: bpy.types.Material, input_socket_key='Surface'):
     ret = Tf.MakeValidIdentifier(mat.name_full)
     if input_socket_key != 'Surface':
-        ret += "/" + Tf.MakeValidIdentifier(mat.name_full)
+        ret += f"/{Tf.MakeValidIdentifier(mat.name_full)}"
 
     return ret
 
@@ -83,8 +83,7 @@ def sync_update_all(root_prim, mat: bpy.types.Material):
     sdf_mat_name = sdf_name(mat)
     mat_prims = []
     for obj_prim in root_prim.GetAllChildren():
-        mat_prim = obj_prim.GetChild(sdf_mat_name)
-        if mat_prim:
+        if mat_prim := obj_prim.GetChild(sdf_mat_name):
             mat_prims.append(mat_prim)
 
     if not mat_prims:
